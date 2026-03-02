@@ -1,22 +1,34 @@
 import java.util.Scanner;
+import java.util.Stack;
 
-public class  PalindromeChecker{
+// Service class following OOPS principles
+class PalindromeChecker {
 
-    public static boolean isPalindrome(String str) {
+    // Public method exposed to users
+    public boolean checkPalindrome(String input) {
 
-        int start = 0;
-        int end = str.length() - 1;
+        // Normalize input (ignore case & spaces)
+        String normalized = input.replaceAll("\\s+", "").toLowerCase();
 
-        while (start < end) {
-            if (str.charAt(start) != str.charAt(end)) {
+        Stack<Character> stack = new Stack<>();
+
+        // Push all characters onto stack
+        for (int i = 0; i < normalized.length(); i++) {
+            stack.push(normalized.charAt(i));
+        }
+
+        // Compare original string with reversed (using stack)
+        for (int i = 0; i < normalized.length(); i++) {
+            if (normalized.charAt(i) != stack.pop()) {
                 return false;
             }
-            start++;
-            end--;
         }
 
         return true;
     }
+}
+
+public class PalindromeCheckerApp {
 
     public static void main(String[] args) {
 
@@ -25,15 +37,13 @@ public class  PalindromeChecker{
         System.out.print("Enter a string: ");
         String input = scanner.nextLine();
 
-        // Normalize string:
-        // 1. Remove spaces using regex
-        // 2. Convert to lowercase
-        String normalized = input.replaceAll("\\s+", "").toLowerCase();
+        // Create object of service class
+        PalindromeChecker checker = new PalindromeChecker();
 
-        boolean result = isPalindrome(normalized);
+        boolean result = checker.checkPalindrome(input);
 
         if (result) {
-            System.out.println("The given string is a Palindrome (ignoring spaces and case).");
+            System.out.println("The given string is a Palindrome.");
         } else {
             System.out.println("The given string is NOT a Palindrome.");
         }
