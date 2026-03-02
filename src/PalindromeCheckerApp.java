@@ -1,30 +1,69 @@
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 
-// Service class following OOPS principles
-class PalindromeChecker {
+// Strategy interface
+interface PalindromeStrategy {
+    boolean check(String input);
+}
 
-    // Public method exposed to users
-    public boolean checkPalindrome(String input) {
+// Stack-based strategy
+class StackStrategy implements PalindromeStrategy {
 
-        // Normalize input (ignore case & spaces)
+    @Override
+    public boolean check(String input) {
         String normalized = input.replaceAll("\\s+", "").toLowerCase();
-
         Stack<Character> stack = new Stack<>();
 
-        // Push all characters onto stack
-        for (int i = 0; i < normalized.length(); i++) {
-            stack.push(normalized.charAt(i));
+        for (char c : normalized.toCharArray()) {
+            stack.push(c);
         }
 
-        // Compare original string with reversed (using stack)
-        for (int i = 0; i < normalized.length(); i++) {
-            if (normalized.charAt(i) != stack.pop()) {
+        for (char c : normalized.toCharArray()) {
+            if (c != stack.pop()) {
                 return false;
             }
         }
 
         return true;
+    }
+}
+
+// Deque-based strategy
+class DequeStrategy implements PalindromeStrategy {
+
+    @Override
+    public boolean check(String input) {
+        String normalized = input.replaceAll("\\s+", "").toLowerCase();
+        Deque<Character> deque = new ArrayDeque<>();
+
+        for (char c : normalized.toCharArray()) {
+            deque.addLast(c);
+        }
+
+        while (deque.size() > 1) {
+            if (deque.removeFirst() != deque.removeLast()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+// Context class
+class PalindromeCheckerContext {
+
+    private PalindromeStrategy strategy;
+
+    // Inject strategy at runtime
+    public void setStrategy(PalindromeStrategy strategy) {
+        this.strategy = strategy;
+    }
+
+    public boolean check(String input) {
+        if (strategy == null) {
+            throw new IllegalStateException("Strategy not set!");
+        }
+        return strategy.check(input);
     }
 }
 
@@ -37,10 +76,25 @@ public class PalindromeCheckerApp {
         System.out.print("Enter a string: ");
         String input = scanner.nextLine();
 
-        // Create object of service class
-        PalindromeChecker checker = new PalindromeChecker();
+        PalindromeCheckerContext context = new PalindromeCheckerContext();
 
-        boolean result = checker.checkPalindrome(input);
+        System.out.println("Choose strategy: 1 = Stack, 2 = Deque");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        switch (choice) {
+            case 1:
+                context.setStrategy(new StackStrategy());
+                break;
+            case 2:
+                context.setStrategy(new DequeStrategy());
+                break;
+            default:
+                System.out.println("Invalid choice, using StackStrategy by default.");
+                context.setStrategy(new StackStrategy());
+        }
+
+        boolean result = context.check(input);
 
         if (result) {
             System.out.println("The given string is a Palindrome.");
